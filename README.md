@@ -1,3 +1,5 @@
+[![Лицензия: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm--Noncommercial%201.0.0-informational?style=flat&label=license)](./LICENSE)
+
 # astra_ai_qa_backend
 
 Бэкенд корпоративной платформы непрерывного QA: проекты, тест-сьюиты и тест-кейсы, прогоны, дефекты, аналитика, импорт/экспорт, интеграции и сценарии с **AI-ассистентом** (генерация и анализ по контракту API). Репозиторий подготовлен в рамках **дипломной работы**; здесь — серверная часть (Litestar, API, задачи воркера, БД, SSO).
