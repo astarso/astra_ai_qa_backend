@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Report {{ run_id }}</title>
+    <style>
+        @page { size: A4; margin: 2cm; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #222; }
+
+        .header { border-bottom: 3px solid #2563eb; padding-bottom: 12px; margin-bottom: 20px; }
+        .header h1 { font-size: 22px; color: #1e40af; margin-bottom: 6px; }
+        .header-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 11px; color: #555; }
+        .header-meta span { background: #f1f5f9; padding: 3px 8px; border-radius: 3px; }
+        .header-meta strong { color: #1e293b; }
+
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-bottom: 16px; }
+        .badge-ready { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-review { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; text-align: center; }
+        .stat-card .value { font-size: 26px; font-weight: bold; color: #1e293b; }
+        .stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 4px; }
+        .stat-card.pass .value { color: #16a34a; }
+        .stat-card.fail .value { color: #dc2626; }
+
+        .section { margin-bottom: 24px; }
+        .section h2 { font-size: 14px; color: #1e40af; border-bottom: 2px solid #dbeafe; padding-bottom: 5px; margin-bottom: 12px; }
+
+        .ai-summary { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 5px; padding: 12px; color: #166534; font-size: 11px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        thead tr { background: #1e40af; color: white; }
+        th { padding: 8px 10px; text-align: left; font-weight: 600; }
+        tbody tr { border-bottom: 1px solid #e2e8f0; }
+        td { padding: 8px 10px; vertical-align: top; }
+        tbody tr:nth-child(even) { background: #f8fafc; }
+        tbody tr:hover { background: #f1f5f9; }
+
+        .category { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+        .cat-real_defect { background: #fee2e2; color: #991b1b; }
+        .cat-flaky { background: #fef3c7; color: #92400e; }
+        .cat-infrastructure { background: #e0e7ff; color: #3730a3; }
+
+        .error-msg { font-size: 10px; color: #64748b; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+        .suggestion { font-size: 10px; color: #166534; }
+
+        .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Test Execution Report</h1>
+        <div class="header-meta">
+            <span><strong>Run:</strong> {{ run_id }}</span>
+            <span><strong>Branch:</strong> {{ branch }}</span>
+            <span><strong>Commit:</strong> {{ commit_sha }}</span>
+            <span><strong>Generated:</strong> {{ generated_at }}</span>
+        </div>
+    </div>
+
+    {% if pass_rate >= 80 %}
+    <div class="badge badge-ready"> RELEASE READY</div>
+    {% else %}
+    <div class="badge badge-review"> NEEDS REVIEW</div>
+    {% endif %}
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="value">{{ pass_rate }}%</div>
+            <div class="label">Pass Rate</div>
+        </div>
+        <div class="stat-card pass">
+            <div class="value">{{ passed_count }}</div>
+            <div class="label">Passed</div>
+        </div>
+        <div class="stat-card fail">
+            <div class="value">{{ failed_count }}</div>
+            <div class="label">Failed</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">{{ total_tests }}</div>
+            <div class="label">Total Tests</div>
+        </div>
+    </div>
+
+    {% if ai_summary %}
+    <div class="section">
+        <h2>AI Risk Assessment</h2>
+        <div class="ai-summary">{{ ai_summary }}</div>
+    </div>
+    {% endif %}
+
+    {% if failed_tests %}
+    <div class="section">
+        <h2>Failed Tests ({{ failed_count }})</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Test</th>
+                    <th>Error</th>
+                    <th>Category</th>
+                    <th>Suggestion</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for test in failed_tests %}
+                <tr>
+                    <td>{{ test.title }}</td>
+                    <td><span class="error-msg">{{ test.error_message | e }}</span></td>
+                    <td>
+                        {% if test.category %}
+                        <span class="category cat-{{ test.category }}">{{ test.category }}</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="suggestion">{{ test.suggestion | e }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        Generated by Astra QA Platform &mdash; {{ generated_at }}
+    </div>
+</body>
+</html>
